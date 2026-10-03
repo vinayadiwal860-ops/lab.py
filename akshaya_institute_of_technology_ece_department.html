@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akshaya Institute of Technology - ECE Department</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Editing mode styles */
+        .edit-mode-active [contenteditable="true"] {
+            outline: 2px dashed #0284c7;
+            outline-offset: 3px;
+            border-radius: 4px;
+            background-color: rgba(2, 132, 199, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .edit-mode-active [contenteditable="true"]:focus {
+            outline: 2px solid #2563eb;
+            background-color: #ffffff;
+        }
+
+        .upload-overlay {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .edit-mode-active .upload-overlay {
+            opacity: 1;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Floating Admin Edit Toolbar -->
+    <div id="edit-bar" class="sticky top-0 z-50 bg-slate-900 text-white shadow-xl border-b border-slate-800 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <span id="edit-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> View Mode
+                </span>
+                <p class="text-xs text-slate-300 hidden sm:block">Toggle Edit Mode to click and change text, replace images, or add/remove items directly!</p>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button id="toggle-edit-btn" onclick="toggleEditMode()" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-pen-to-square"></i> <span id="toggle-btn-text">Enable Edit Mode</span>
+                </button>
+                <button onclick="saveAllChanges()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                </button>
+                <button onclick="resetToDefaults()" class="px-3 py-1.5 bg-slate-800 hover:bg-red-900/40 hover:text-red-300 text-slate-400 rounded-lg text-xs font-medium transition flex items-center gap-1.5 border border-slate-700">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-[45px] z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo & College Name -->
+                <div class="flex items-center space-x-3">
+                    <div class="relative group">
+                        <img id="college-logo" src="https://placehold.co/100x100/0284c7/ffffff?text=AIT+Logo" alt="College Logo" class="w-12 h-12 rounded-xl object-contain border border-slate-200 p-1 bg-white shadow-sm">
+                        <label for="logo-upload" class="upload-overlay absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center cursor-pointer text-white text-xs">
+                            <i class="fa-solid fa-camera"></i>
+                        </label>
+                        <input type="file" id="logo-upload" accept="image/*" class="hidden" onchange="uploadImage(event, 'college-logo')">
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight tracking-tight" id="college-title" contenteditable="false">
+                            Akshaya Institute of Technology
+                        </h1>
+                        <p class="text-xs sm:text-sm font-semibold text-brand-600 tracking-wide uppercase" id="dept-subtitle" contenteditable="false">
+                            Department of Electronics & Communication Engineering
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-600">
+                    <a href="#about" class="hover:text-brand-600 transition">About</a>
+                    <a href="#hod" class="hover:text-brand-600 transition">HOD Message</a>
+                    <a href="#faculty" class="hover:text-brand-600 transition">Faculty</a>
+                    <a href="#labs" class="hover:text-brand-600 transition">Labs</a>
+                    <a href="#gallery" class="hover:text-brand-600 transition">Gallery</a>
+                    <a href="#contact" class="hover:text-brand-600 transition">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner Section -->
+    <section class="relative bg-slate-900 text-white overflow-hidden py-16 lg:py-24">
+        <div class="absolute inset-0 z-0">
+            <img id="hero-bg-img" src="https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=1600&q=80" alt="Department Banner" class="w-full h-full object-cover opacity-25">
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/90 to-transparent"></div>
+        </div>
+
+        <div class="upload-overlay absolute top-4 right-4 z-20">
+            <label for="hero-bg-upload" class="px-3 py-2 bg-white/90 hover:bg-white text-slate-900 rounded-lg text-xs font-semibold cursor-pointer shadow-lg flex items-center gap-2 backdrop-blur-sm transition">
+                <i class="fa-solid fa-image text-brand-600"></i> Change Hero Background Image
+            </label>
+            <input type="file" id="hero-bg-upload" accept="image/*" class="hidden" onchange="uploadImage(event, 'hero-bg-img')">
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-3xl">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-300 border border-brand-500/30 mb-4" id="hero-tag" contenteditable="false">
+                    NBA Accredited & NBA Approved Center
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-4 leading-tight" id="hero-heading" contenteditable="false">
+                    Empowering Next-Gen Electronics & Signal Innovation
+                </h2>
+                <p class="text-base sm:text-lg text-slate-300 mb-8 leading-relaxed" id="hero-description" contenteditable="false">
+                    Welcome to the ECE Department at Akshaya Institute of Technology. We foster cutting-edge research in VLSI, Embedded Systems, Communications, and Robotics to build visionary engineers for tomorrow.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#labs" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm transition shadow-lg shadow-brand-600/30">
+                        Explore Laboratories
+                    </a>
+                    <a href="#contact" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm transition">
+                        Get In Touch
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Department Quick Stats -->
+    <section class="bg-white border-y border-slate-200 py-8 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-bold text-brand-600 mb-1" id="stat-1-val" contenteditable="false">450+</div>
+                    <div class="text-xs font-medium text-slate-500 uppercase tracking-wider" id="stat-1-label" contenteditable="false">Students Enrolled</div>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-bold text-brand-600 mb-1" id="stat-2-val" contenteditable="false">24+</div>
+                    <div class="text-xs font-medium text-slate-500 uppercase tracking-wider" id="stat-2-label" contenteditable="false">Faculty Members</div>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-bold text-brand-600 mb-1" id="stat-3-val" contenteditable="false">8+</div>
+                    <div class="text-xs font-medium text-slate-500 uppercase tracking-wider" id="stat-3-label" contenteditable="false">Advanced Research Labs</div>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div class="text-3xl font-bold text-brand-600 mb-1" id="stat-4-val" contenteditable="false">92%</div>
+                    <div class="text-xs font-medium text-slate-500 uppercase tracking-wider" id="stat-4-label" contenteditable="false">Placement Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section & Vision / Mission -->
+    <section id="about" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900" id="about-title" contenteditable="false">About the Department</h2>
+                <div class="w-16 h-1 bg-brand-600 mx-auto mt-2 rounded-full"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Vision -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-eye"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" id="vision-title" contenteditable="false">Our Vision</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" id="vision-text" contenteditable="false">
+                        To evolve into a center of excellence in Electronics and Communication Engineering education and technological innovation, preparing globally competitive graduates with ethical values and social commitment.
+                    </p>
+                </div>
+
+                <!-- Mission -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3" id="mission-title" contenteditable="false">Our Mission</h3>
+                    <p class="text-slate-600 leading-relaxed text-sm" id="mission-text" contenteditable="false">
+                        1. Provide rigorous curriculum blended with state-of-the-art laboratory practice.<br>
+                        2. Foster industry-institute collaboration for practical exposure.<br>
+                        3. Encourage research, entrepreneurship, and lifelong learning for sustainable solutions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOD Message Section -->
+    <section id="hod" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-slate-900 rounded-3xl overflow-hidden shadow-xl text-white">
+                <div class="grid lg:grid-cols-12 items-center">
+                    <!-- HOD Image Column -->
+                    <div class="lg:col-span-4 relative group aspect-square lg:aspect-auto h-full min-h-[320px]">
+                        <img id="hod-photo" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80" alt="Head of Department" class="w-full h-full object-cover">
+                        <div class="upload-overlay absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer">
+                            <label for="hod-photo-upload" class="px-4 py-2 bg-white text-slate-900 rounded-lg text-xs font-semibold cursor-pointer shadow flex items-center gap-2">
+                                <i class="fa-solid fa-camera text-brand-600"></i> Change HOD Photo
+                            </label>
+                            <input type="file" id="hod-photo-upload" accept="image/*" class="hidden" onchange="uploadImage(event, 'hod-photo')">
+                        </div>
+                    </div>
+
+                    <!-- HOD Details Column -->
+                    <div class="lg:col-span-8 p-8 lg:p-12">
+                        <span class="text-xs font-semibold uppercase tracking-widest text-brand-400 mb-2 block">Head of Department</span>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-white mb-1" id="hod-name" contenteditable="false">Dr. Rajesh V. Kumar</h3>
+                        <p class="text-brand-300 text-xs sm:text-sm mb-6 font-medium" id="hod-credentials" contenteditable="false">Ph.D. in VLSI Systems, M.Tech (IIT Madras)</p>
+                        
+                        <blockquote class="text-slate-300 italic text-sm sm:text-base leading-relaxed mb-6 border-l-2 border-brand-500 pl-4" id="hod-quote" contenteditable="false">
+                            "Our goal is to inspire innovation and critical thinking. We empower our electronics engineers to solve real-world technical problems through hands-on learning, cutting-edge software tools, and active research initiatives."
+                        </blockquote>
+
+                        <div class="flex items-center space-x-4 text-xs text-slate-400">
+                            <span><i class="fa-solid fa-envelope text-brand-400 mr-1.5"></i> <span id="hod-email" contenteditable="false">hod.ece@akshaya.edu.in</span></span>
+                            <span><i class="fa-solid fa-phone text-brand-400 mr-1.5"></i> <span id="hod-phone" contenteditable="false">+91 (080) 2345-6789</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Faculty Members Grid -->
+    <section id="faculty" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900" id="faculty-section-title" contenteditable="false">Faculty Members</h2>
+                    <p class="text-sm text-slate-500 mt-1" id="faculty-section-sub" contenteditable="false">Experienced academicians and active industry researchers</p>
+                </div>
+                <button onclick="addFacultyCard()" class="edit-mode-btn hidden mt-4 sm:mt-0 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Add New Faculty
+                </button>
+            </div>
+
+            <!-- Faculty Grid Container -->
+            <div id="faculty-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Faculty cards will be dynamically rendered here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Laboratories & Facilities -->
+    <section id="labs" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900" id="labs-section-title" contenteditable="false">State-of-the-Art Laboratories</h2>
+                    <p class="text-sm text-slate-500 mt-1" id="labs-section-sub" contenteditable="false">Equipped with industry-standard hardware and CAD design suites</p>
+                </div>
+                <button onclick="addLabCard()" class="edit-mode-btn hidden mt-4 sm:mt-0 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-flask-vial"></i> Add New Laboratory
+                </button>
+            </div>
+
+            <!-- Labs Grid -->
+            <div id="labs-container" class="grid md:grid-cols-2 gap-8">
+                <!-- Lab cards dynamically rendered -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900" id="gallery-section-title" contenteditable="false">Department Gallery & Events</h2>
+                    <p class="text-sm text-slate-500 mt-1" id="gallery-section-sub" contenteditable="false">Moments from workshops, symposiums, and student innovations</p>
+                </div>
+                <button onclick="addGalleryImage()" class="edit-mode-btn hidden mt-4 sm:mt-0 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Gallery Photo
+                </button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Gallery cards dynamically rendered -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Notice & Contact Section -->
+    <section id="contact" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-12">
+                <!-- Notice Board -->
+                <div class="lg:col-span-5 bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-bullhorn text-brand-600"></i> Department News
+                        </h3>
+                        <button onclick="addNotice()" class="edit-mode-btn hidden px-2.5 py-1 bg-brand-600 text-white rounded-lg text-xs font-semibold">
+                            + Add Notice
+                        </button>
+                    </div>
+                    <div id="notices-container" class="space-y-4">
+                        <!-- Notices rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="lg:col-span-7 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-4" id="contact-heading" contenteditable="false">Contact ECE Department</h3>
+                        <p class="text-slate-600 text-sm mb-8" id="contact-sub" contenteditable="false">
+                            Have questions regarding admissions, research collaborations, or placement drives? Reach out directly to our department coordinator.
+                        </p>
+
+                        <div class="space-y-4 text-sm text-slate-700 mb-8">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-900">Campus Location</h4>
+                                    <p id="contact-address" contenteditable="false">Block C, ECE Wing, Akshaya Institute Campus, Electronics City, Bengaluru - 560100</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-900">Email Enquiries</h4>
+                                    <p id="contact-email" contenteditable="false">ece.head@akshaya.edu.in / admissions@akshaya.edu.in</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-900">Phone & Helpline</h4>
+                                    <p id="contact-phone" contenteditable="false">+91 (080) 2839-9000, Ext: 401</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-200 text-xs text-slate-500">
+                        <p>© <span id="year-span">2026</span> Akshaya Institute of Technology. All Rights Reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification Toast Container -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">Changes saved successfully!</span>
+    </div>
+
+    <!-- JavaScript State & Logic -->
+    <script>
+        // Global State & Data
+        let isEditMode = false;
+
+        const defaultData = {
+            faculty: [
+                {
+                    id: 'fac-1',
+                    name: 'Dr. Anita Sharma',
+                    role: 'Professor & Deputy HOD',
+                    spec: 'Signal Processing & Wireless Comm.',
+                    email: 'anita.sharma@akshaya.edu.in',
+                    img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80'
+                },
+                {
+                    id: 'fac-2',
+                    name: 'Prof. Ramesh K. Rao',
+                    role: 'Associate Professor',
+                    spec: 'VLSI Design & Embedded Systems',
+                    email: 'ramesh.rao@akshaya.edu.in',
+                    img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80'
+                },
+                {
+                    id: 'fac-3',
+                    name: 'Dr. Sunita Deshmukh',
+                    role: 'Assistant Professor',
+                    spec: 'Robotics & IoT Sensors',
+                    email: 'sunita.d@akshaya.edu.in',
+                    img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80'
+                }
+            ],
+            labs: [
+                {
+                    id: 'lab-1',
+                    name: 'VLSI & Chip Design Lab',
+                    equipment: 'Cadence EDA Suite, Xilinx FPGA Boards, Synopsys Tools',
+                    desc: 'Advanced research environment for ASIC design, synthesis, and layout simulation.',
+                    img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'
+                },
+                {
+                    id: 'lab-2',
+                    name: 'Embedded Systems & IoT Lab',
+                    equipment: 'ARM Cortex Kits, Raspberry Pi 4, ESP32, NodeMCU Sensors',
+                    desc: 'Hands-on lab for microcontrollers, wireless sensor networks, and edge AI applications.',
+                    img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80'
+                }
+            ],
+            gallery: [
+                {
+                    id: 'gal-1',
+                    title: 'National Robotics Expo 2026',
+                    img: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80'
+                },
+                {
+                    id: 'gal-2',
+                    title: 'VLSI Chip Design Workshop',
+                    img: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80'
+                },
+                {
+                    id: 'gal-3',
+                    title: 'IEEE Student Branch Conference',
+                    img: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'
+                }
+            ],
+            notices: [
+                { id: 'not-1', date: 'Oct 10, 2026', title: 'Guest Lecture on 6G Wireless Technologies by IISc Scientist.' },
+                { id: 'not-2', date: 'Oct 15, 2026', title: 'Submission deadline for Final Year Capstone Project Abstracts.' },
+                { id: 'not-3', date: 'Oct 22, 2026', title: 'IEEE Student Chapter Hackathon Registration Open.' }
+            ]
+        };
+
+        let currentData = JSON.parse(localStorage.getItem('ait_ece_data')) || defaultData;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            renderFaculty();
+            renderLabs();
+            renderGallery();
+            renderNotices();
+            loadSavedTextData();
+        });
+
+        // Image Upload Helper Function using FileReader
+        function uploadImage(event, targetImageId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select a valid image file.', true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgElement = document.getElementById(targetImageId);
+                if (imgElement) {
+                    imgElement.src = e.target.result;
+                    showToast('Image uploaded & updated successfully!');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Generic dynamic image uploader for array items (Faculty, Labs, Gallery)
+        function uploadDynamicImage(event, arrayName, itemId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const item = currentData[arrayName].find(x => x.id === itemId);
+                if (item) {
+                    item.img = e.target.result;
+                    if (arrayName === 'faculty') renderFaculty();
+                    if (arrayName === 'labs') renderLabs();
+                    if (arrayName === 'gallery') renderGallery();
+                    showToast('Photo updated!');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Toggle Edit Mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const body = document.body;
+            const badge = document.getElementById('edit-badge');
+            const toggleBtnText = document.getElementById('toggle-btn-text');
+            const editModeBtns = document.querySelectorAll('.edit-mode-btn');
+
+            if (isEditMode) {
+                body.classList.add('edit-mode-active');
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-700 flex items-center gap-1.5";
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Edit Mode Active';
+                toggleBtnText.innerText = 'Exit Edit Mode';
+                editModeBtns.forEach(btn => btn.classList.remove('hidden'));
+                enableContentEditable(true);
+                showToast('Edit Mode Enabled! Click any text or upload icon to edit.');
+            } else {
+                body.classList.remove('edit-mode-active');
+                badge.className = "px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1.5";
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400"></span> View Mode';
+                toggleBtnText.innerText = 'Enable Edit Mode';
+                editModeBtns.forEach(btn => btn.classList.add('hidden'));
+                enableContentEditable(false);
+                showToast('View Mode Restored.');
+            }
+        }
+
+        function enableContentEditable(status) {
+            const editableElements = document.querySelectorAll('[contenteditable]');
+            editableElements.forEach(el => {
+                el.setAttribute('contenteditable', status ? 'true' : 'false');
+            });
+        }
+
+        // Faculty Render & Dynamic Handlers
+        function renderFaculty() {
+            const container = document.getElementById('faculty-container');
+            container.innerHTML = currentData.faculty.map(f => `
+                <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative group hover:shadow-md transition">
+                    <div class="relative h-64 overflow-hidden bg-slate-100">
+                        <img src="${f.img}" alt="${f.name}" id="img-${f.id}" class="w-full h-full object-cover">
+                        <div class="upload-overlay absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <label for="upload-${f.id}" class="px-3 py-1.5 bg-white text-slate-900 rounded-lg text-xs font-semibold cursor-pointer shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-camera text-brand-600"></i> Change Photo
+                            </label>
+                            <input type="file" id="upload-${f.id}" accept="image/*" class="hidden" onchange="uploadDynamicImage(event, 'faculty', '${f.id}')">
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-slate-900 text-lg" contenteditable="${isEditMode}" onblur="updateFacultyField('${f.id}', 'name', this.innerText)">${f.name}</h3>
+                        <p class="text-brand-600 font-semibold text-xs mb-1" contenteditable="${isEditMode}" onblur="updateFacultyField('${f.id}', 'role', this.innerText)">${f.role}</p>
+                        <p class="text-slate-500 text-xs mb-3" contenteditable="${isEditMode}" onblur="updateFacultyField('${f.id}', 'spec', this.innerText)">${f.spec}</p>
+                        <p class="text-xs text-slate-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span contenteditable="${isEditMode}" onblur="updateFacultyField('${f.id}', 'email', this.innerText)">${f.email}</span>
+                        </p>
+                    </div>
+                    ${isEditMode ? `<button onclick="deleteFaculty('${f.id}')" class="absolute top-3 right-3 bg-red-600 text-white w-7 h-7 rounded-full text-xs flex items-center justify-center shadow-lg hover:bg-red-700 transition"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateFacultyField(id, field, value) {
+            const fac = currentData.faculty.find(x => x.id === id);
+            if (fac) fac[field] = value;
+        }
+
+        function addFacultyCard() {
+            const newId = 'fac-' + Date.now();
+            currentData.faculty.push({
+                id: newId,
+                name: 'New Faculty Name',
+                role: 'Assistant Professor',
+                spec: 'Specialization Area',
+                email: 'faculty@akshaya.edu.in',
+                img: 'https://placehold.co/600x600/0284c7/ffffff?text=Faculty+Photo'
+            });
+            renderFaculty();
+            showToast('New faculty card added!');
+        }
+
+        function deleteFaculty(id) {
+            currentData.faculty = currentData.faculty.filter(x => x.id !== id);
+            renderFaculty();
+            showToast('Faculty removed.');
+        }
+
+        // Labs Render & Dynamic Handlers
+        function renderLabs() {
+            const container = document.getElementById('labs-container');
+            container.innerHTML = currentData.labs.map(l => `
+                <div class="bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative group">
+                    <div class="relative h-48 overflow-hidden bg-slate-200">
+                        <img src="${l.img}" alt="${l.name}" class="w-full h-full object-cover">
+                        <div class="upload-overlay absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <label for="upload-${l.id}" class="px-3 py-1.5 bg-white text-slate-900 rounded-lg text-xs font-semibold cursor-pointer shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-camera text-brand-600"></i> Change Lab Photo
+                            </label>
+                            <input type="file" id="upload-${l.id}" accept="image/*" class="hidden" onchange="uploadDynamicImage(event, 'labs', '${l.id}')">
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-slate-900 text-lg mb-2" contenteditable="${isEditMode}" onblur="updateLabField('${l.id}', 'name', this.innerText)">${l.name}</h3>
+                        <p class="text-xs text-brand-600 font-semibold mb-2" contenteditable="${isEditMode}" onblur="updateLabField('${l.id}', 'equipment', this.innerText)">Key Equipment: ${l.equipment}</p>
+                        <p class="text-slate-600 text-xs leading-relaxed" contenteditable="${isEditMode}" onblur="updateLabField('${l.id}', 'desc', this.innerText)">${l.desc}</p>
+                    </div>
+                    ${isEditMode ? `<button onclick="deleteLab('${l.id}')" class="absolute top-3 right-3 bg-red-600 text-white w-7 h-7 rounded-full text-xs flex items-center justify-center shadow-lg hover:bg-red-700 transition"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateLabField(id, field, value) {
+            const lab = currentData.labs.find(x => x.id === id);
+            if (lab) lab[field] = value;
+        }
+
+        function addLabCard() {
+            const newId = 'lab-' + Date.now();
+            currentData.labs.push({
+                id: newId,
+                name: 'New Laboratory Name',
+                equipment: 'Equipment List Details',
+                desc: 'Describe purpose and facilities offered by this lab.',
+                img: 'https://placehold.co/800x500/0284c7/ffffff?text=Laboratory+Photo'
+            });
+            renderLabs();
+            showToast('New laboratory added!');
+        }
+
+        function deleteLab(id) {
+            currentData.labs = currentData.labs.filter(x => x.id !== id);
+            renderLabs();
+            showToast('Laboratory removed.');
+        }
+
+        // Gallery Render & Dynamic Handlers
+        function renderGallery() {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = currentData.gallery.map(g => `
+                <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative group">
+                    <div class="relative h-52 overflow-hidden bg-slate-100">
+                        <img src="${g.img}" alt="${g.title}" class="w-full h-full object-cover">
+                        <div class="upload-overlay absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <label for="upload-${g.id}" class="px-3 py-1.5 bg-white text-slate-900 rounded-lg text-xs font-semibold cursor-pointer shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-camera text-brand-600"></i> Change Image
+                            </label>
+                            <input type="file" id="upload-${g.id}" accept="image/*" class="hidden" onchange="uploadDynamicImage(event, 'gallery', '${g.id}')">
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <p class="font-semibold text-slate-900 text-xs" contenteditable="${isEditMode}" onblur="updateGalleryTitle('${g.id}', this.innerText)">${g.title}</p>
+                    </div>
+                    ${isEditMode ? `<button onclick="deleteGallery('${g.id}')" class="absolute top-3 right-3 bg-red-600 text-white w-7 h-7 rounded-full text-xs flex items-center justify-center shadow-lg hover:bg-red-700 transition"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateGalleryTitle(id, value) {
+            const item = currentData.gallery.find(x => x.id === id);
+            if (item) item.title = value;
+        }
+
+        function addGalleryImage() {
+            const newId = 'gal-' + Date.now();
+            currentData.gallery.push({
+                id: newId,
+                title: 'Event / Workshop Title',
+                img: 'https://placehold.co/800x500/0284c7/ffffff?text=Gallery+Photo'
+            });
+            renderGallery();
+            showToast('Gallery image slot added!');
+        }
+
+        function deleteGallery(id) {
+            currentData.gallery = currentData.gallery.filter(x => x.id !== id);
+            renderGallery();
+            showToast('Gallery item removed.');
+        }
+
+        // Notices Render
+        function renderNotices() {
+            const container = document.getElementById('notices-container');
+            container.innerHTML = currentData.notices.map(n => `
+                <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex items-start gap-3 relative">
+                    <div class="bg-brand-50 text-brand-600 p-2 rounded-lg text-xs font-bold shrink-0" contenteditable="${isEditMode}" onblur="updateNotice('${n.id}', 'date', this.innerText)">
+                        ${n.date}
+                    </div>
+                    <p class="text-xs text-slate-700 font-medium leading-relaxed pr-6" contenteditable="${isEditMode}" onblur="updateNotice('${n.id}', 'title', this.innerText)">
+                        ${n.title}
+                    </p>
+                    ${isEditMode ? `<button onclick="deleteNotice('${n.id}')" class="absolute top-2 right-2 text-red-500 hover:text-red-700 text-xs"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function updateNotice(id, field, val) {
+            const not = currentData.notices.find(x => x.id === id);
+            if (not) not[field] = val;
+        }
+
+        function addNotice() {
+            currentData.notices.unshift({
+                id: 'not-' + Date.now(),
+                date: 'Oct 2026',
+                title: 'Click to edit new department announcement details.'
+            });
+            renderNotices();
+        }
+
+        function deleteNotice(id) {
+            currentData.notices = currentData.notices.filter(x => x.id !== id);
+            renderNotices();
+        }
+
+        // LocalStorage Save & Load Logic
+        function saveAllChanges() {
+            // Collect all custom text nodes by ID
+            const textIds = [
+                'college-title', 'dept-subtitle', 'hero-tag', 'hero-heading', 'hero-description',
+                'stat-1-val', 'stat-1-label', 'stat-2-val', 'stat-2-label', 'stat-3-val', 'stat-3-label', 'stat-4-val', 'stat-4-label',
+                'about-title', 'vision-title', 'vision-text', 'mission-title', 'mission-text',
+                'hod-name', 'hod-credentials', 'hod-quote', 'hod-email', 'hod-phone',
+                'contact-heading', 'contact-sub', 'contact-address', 'contact-email', 'contact-phone'
+            ];
+
+            const textData = {};
+            textIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) textData[id] = el.innerHTML;
+            });
+
+            // Images
+            const images = {
+                logo: document.getElementById('college-logo')?.src,
+                heroBg: document.getElementById('hero-bg-img')?.src,
+                hodPhoto: document.getElementById('hod-photo')?.src
+            };
+
+            const fullSavePayload = {
+                textData,
+                images,
+                faculty: currentData.faculty,
+                labs: currentData.labs,
+                gallery: currentData.gallery,
+                notices: currentData.notices
+            };
+
+            localStorage.setItem('ait_ece_data', JSON.stringify(fullSavePayload));
+            showToast('All webpage edits and images saved!');
+        }
+
+        function loadSavedTextData() {
+            const saved = localStorage.getItem('ait_ece_data');
+            if (!saved) return;
+
+            try {
+                const data = JSON.parse(saved);
+                if (data.textData) {
+                    Object.keys(data.textData).forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.innerHTML = data.textData[id];
+                    });
+                }
+                if (data.images) {
+                    if (data.images.logo) document.getElementById('college-logo').src = data.images.logo;
+                    if (data.images.heroBg) document.getElementById('hero-bg-img').src = data.images.heroBg;
+                    if (data.images.hodPhoto) document.getElementById('hod-photo').src = data.images.hodPhoto;
+                }
+            } catch (err) {
+                console.error("Error loading saved data", err);
+            }
+        }
+
+        function resetToDefaults() {
+            localStorage.removeItem('ait_ece_data');
+            currentData = JSON.parse(JSON.stringify(defaultData));
+            location.reload();
+        }
+
+        // Custom Toast Notification (No alert/confirm used)
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = msg;
+            if (isError) {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-red-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
