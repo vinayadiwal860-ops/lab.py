@@ -1,13 +1,500 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sticker-studio</title>
+    <title>NASA Mission Pulse</title>
+    <meta name="description" content="NASA Mission Pulse is a futuristic space intelligence dashboard exploring NASA data, Earth observations, solar activity and deep-space discoveries." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='10' fill='%23ff6d6d'/%3E%3Ccircle cx='32' cy='32' r='24' fill='none' stroke='%237fe7ff' stroke-width='2' stroke-dasharray='5 7'/%3E%3Cpath d='M14 20c8 3 16 4 36 0M14 44c8-3 16-4 36 0' fill='none' stroke='%237fe7ff' stroke-width='2'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="brand-wrap">
+          <div class="brand-mark">N</div>
+          <div>
+            <span class="brand-title">MISSION PULSE</span>
+            <small>Space Intelligence</small>
+          </div>
+        </div>
+        <nav class="top-nav">
+          <a href="#dashboard">Dashboard</a>
+          <a href="#apod">APOD</a>
+          <a href="#solar-weather">Weather</a>
+          <a href="#missions">Missions</a>
+          <a href="#quiz">Quiz</a>
+        </nav>
+        <button class="primary-btn small">Launch</button>
+      </header>
+
+      <main>
+        <section class="hero section reveal">
+          <canvas id="starfield"></canvas>
+          <div class="hero-content">
+            <div class="eyebrow"><span class="pulse-dot"></span> LIVE SPACE DATA</div>
+            <h1>NASA MISSION PULSE</h1>
+            <h2>Your Window Into Space</h2>
+            <p>
+              Explore cosmic events, Earth observations, near-Earth objects and NASA discoveries through interactive data.
+            </p>
+            <div class="hero-actions">
+              <button class="primary-btn">EXPLORE SPACE 🚀</button>
+              <button class="secondary-btn">LIVE NASA DATA 🌎</button>
+            </div>
+            <div class="mini-metrics">
+              <div>
+                <strong data-count="127">0</strong>
+                <span>Tracked objects</span>
+              </div>
+              <div>
+                <strong data-count="48">0</strong>
+                <span>Mission events</span>
+              </div>
+              <div>
+                <strong data-count="24">0</strong>
+                <span>Live feeds</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="planet earth-planet"></div>
+            <div class="moon-orbit"></div>
+            <div class="moon"></div>
+            <div class="satellite sat-one"></div>
+            <div class="satellite sat-two"></div>
+            <div class="astro-card">
+              <div class="astro-icon">🚀</div>
+              <div>
+                <small>Mission status</small>
+                <strong>Orbital drift stable</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="dashboard" class="dashboard section reveal">
+          <div class="section-heading">
+            <span class="section-kicker">MISSION PULSE</span>
+            <h3>LIVE SPACE INTELLIGENCE</h3>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="dashboard-card card-earth">
+              <div class="card-icon">🌎</div>
+              <div class="card-copy">
+                <span>🌎 EARTH</span>
+                <p>Surface temperature and climate monitoring</p>
+              </div>
+              <div class="card-meta">
+                <strong>19.8°C</strong>
+                <button>EXPLORE</button>
+              </div>
+            </article>
+
+            <article class="dashboard-card card-solar">
+              <div class="card-icon">☀️</div>
+              <div class="card-copy">
+                <span>☀️ SOLAR ACTIVITY</span>
+                <p>Realtime flare intensity and solar storms</p>
+              </div>
+              <div class="card-meta">
+                <strong>7.2</strong>
+                <button>EXPLORE</button>
+              </div>
+            </article>
+
+            <article class="dashboard-card card-astronomy">
+              <div class="card-icon">🔭</div>
+              <div class="card-copy">
+                <span>🌌 ASTRONOMY</span>
+                <p>Deep-sky observations and cosmic updates</p>
+              </div>
+              <div class="card-meta">
+                <strong>4.9k</strong>
+                <button>EXPLORE</button>
+              </div>
+            </article>
+
+            <article class="dashboard-card card-asteroids">
+              <div class="card-icon">☄️</div>
+              <div class="card-copy">
+                <span>☄️ ASTEROIDS</span>
+                <p>Near-Earth objects currently monitored</p>
+              </div>
+              <div class="card-meta">
+                <strong>127</strong>
+                <button>EXPLORE</button>
+              </div>
+            </article>
+
+            <article class="dashboard-card card-missions">
+              <div class="card-icon">🚀</div>
+              <div class="card-copy">
+                <span>🛰️ MISSIONS</span>
+                <p>Current and upcoming human space missions</p>
+              </div>
+              <div class="card-meta">
+                <strong>18</strong>
+                <button>EXPLORE</button>
+              </div>
+            </article>
+
+            <article class="dashboard-card card-discoveries">
+              <div class="card-icon">✨</div>
+              <div class="card-copy">
+                <span>🔭 DISCOVERIES</span>
+                <p>New findings from science and observatories</p>
+              </div>
+              <div class="card-meta">
+                <strong>32</strong>
+                <button>EXPLORE</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="apod" class="apod section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">ASTRONOMY</span>
+            <h3>🌌 ASTRONOMY PICTURE OF THE DAY</h3>
+          </div>
+
+          <div class="apod-panel">
+            <div class="apod-image-shell">
+              <img id="apod-image" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80" alt="Astronomy image of the day" />
+              <div class="image-overlay">
+                <button class="ghost-btn" type="button">❤️ Save</button>
+                <button class="ghost-btn" type="button">↗ Share</button>
+                <button class="ghost-btn" type="button">🔍 Explore</button>
+              </div>
+            </div>
+
+            <div class="apod-content">
+              <div class="apod-meta">
+                <span id="apod-date">2026-10-09</span>
+                <span class="apod-badge">NASA / APOD</span>
+              </div>
+              <h4 id="apod-title">The Cosmic Veil</h4>
+              <p id="apod-explanation">
+                A luminous cloud of stellar dust and gas reveals the beauty of deep-space evolution and the forces shaping our universe.
+              </p>
+              <a href="#" class="story-link">Read full story</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="neo section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">TRACKING</span>
+            <h3>☄️ NEAR-EARTH OBJECT TRACKER</h3>
+          </div>
+
+          <div class="neo-layout">
+            <div class="solar-system-scene">
+              <div class="sun-core"></div>
+              <div class="orbit orbit-a"></div>
+              <div class="orbit orbit-b"></div>
+              <div class="orbit orbit-c"></div>
+              <div class="earth-orbital"></div>
+              <div class="planet-sun"></div>
+              <div class="planet-earth"></div>
+              <div class="moon-body"></div>
+              <div class="asteroid-trail active" data-name="2024 QZ5"></div>
+              <div class="asteroid-trail" data-name="APO-17"></div>
+              <div class="asteroid-trail" data-name="Astra-9"></div>
+            </div>
+
+            <div class="neo-panel">
+              <div class="panel-topline">
+                <span>Selected object</span>
+                <span class="risk-pill low">LOW</span>
+              </div>
+              <h4 id="neo-name">2024 QZ5</h4>
+              <div class="neo-stats">
+                <div>
+                  <small>Estimated Size</small>
+                  <strong id="neo-size">190 m</strong>
+                </div>
+                <div>
+                  <small>Velocity</small>
+                  <strong id="neo-velocity">18.7 km/s</strong>
+                </div>
+                <div>
+                  <small>Distance</small>
+                  <strong id="neo-distance">6.4 million km</strong>
+                </div>
+                <div>
+                  <small>Closest Approach</small>
+                  <strong id="neo-closest">2026-11-14</strong>
+                </div>
+              </div>
+              <div class="object-foot">
+                <span>Potential Hazard</span>
+                <strong id="neo-hazard">No immediate risk</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="solar-weather" class="space-weather section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">SPACE WEATHER</span>
+            <h3>☀️ SPACE WEATHER</h3>
+          </div>
+
+          <div class="weather-grid">
+            <div class="weather-card highlight">
+              <small>SOLAR FLARES</small>
+              <strong>M1.7</strong>
+              <span>Current activity</span>
+              <div class="mini-chart chart-one"><span></span></div>
+            </div>
+            <div class="weather-card">
+              <small>SOLAR WIND</small>
+              <strong>548 km/s</strong>
+              <span>Current speed</span>
+              <div class="mini-chart chart-two"><span></span></div>
+            </div>
+            <div class="weather-card">
+              <small>GEOMAGNETIC ACTIVITY</small>
+              <strong>G1</strong>
+              <span>Status</span>
+              <div class="mini-chart chart-three"><span></span></div>
+            </div>
+          </div>
+
+          <div class="weather-explain">
+            <div>
+              <h4>Why does solar activity matter?</h4>
+              <p>
+                Solar flares and solar wind can disturb Earth’s magnetosphere, affecting satellites, GPS signals, radio communication, astronaut safety, and power infrastructure.
+              </p>
+            </div>
+            <ul>
+              <li>Satellites can experience charging and communication interruptions.</li>
+              <li>GPS and navigation systems become less precise during strong geomagnetic storms.</li>
+              <li>Radio communication may be disrupted, especially at high latitudes.</li>
+              <li>Astronauts in orbit may face increased radiation exposure.</li>
+              <li>Power grids can be stressed by induced currents during major events.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="earth-section section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">OBSERVATION</span>
+            <h3>🌎 EARTH FROM SPACE</h3>
+          </div>
+
+          <div class="earth-layout">
+            <div class="earth-viewport">
+              <div class="earth-globe layer-temperature active">
+                <div class="globe-surface"></div>
+                <div class="globe-cloud"></div>
+                <div class="globe-hotspots"></div>
+              </div>
+            </div>
+
+            <div class="earth-panel">
+              <h4>See Earth from a different perspective.</h4>
+              <div class="layer-selectors">
+                <button class="layer-btn active" data-layer="temperature">🌡️ Temperature</button>
+                <button class="layer-btn" data-layer="clouds">☁️ Clouds</button>
+                <button class="layer-btn" data-layer="ocean">🌊 Ocean</button>
+                <button class="layer-btn" data-layer="vegetation">🌳 Vegetation</button>
+                <button class="layer-btn" data-layer="wildfires">🔥 Wildfires</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="missions" class="missions section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">MISSIONS</span>
+            <h3>🚀 NASA MISSIONS</h3>
+          </div>
+
+          <div class="mission-layout">
+            <div class="mission-cards">
+              <button class="mission-card active" data-mission="artemis">
+                <span class="mission-emoji">🚀</span>
+                <div>
+                  <strong>Artemis</strong>
+                  <small>Human lunar return</small>
+                </div>
+              </button>
+              <button class="mission-card" data-mission="mars">
+                <span class="mission-emoji">🔴</span>
+                <div>
+                  <strong>Mars Exploration</strong>
+                  <small>Surface science</small>
+                </div>
+              </button>
+              <button class="mission-card" data-mission="earth">
+                <span class="mission-emoji">🛰️</span>
+                <div>
+                  <strong>Earth Observation</strong>
+                  <small>Climate and land</small>
+                </div>
+              </button>
+              <button class="mission-card" data-mission="webb">
+                <span class="mission-emoji">🔭</span>
+                <div>
+                  <strong>James Webb</strong>
+                  <small>Infrared cosmos</small>
+                </div>
+              </button>
+              <button class="mission-card" data-mission="lunar">
+                <span class="mission-emoji">🌕</span>
+                <div>
+                  <strong>Lunar Exploration</strong>
+                  <small>Robotic science</small>
+                </div>
+              </button>
+            </div>
+
+            <div class="mission-detail">
+              <div class="detail-header">
+                <span class="mission-tag">ACTIVE</span>
+                <span class="mission-status">Status</span>
+              </div>
+              <h4 id="mission-name">Artemis II</h4>
+              <p id="mission-objective">Prepare for deep-space crewed missions around the Moon and validate systems for future exploration.</p>
+              <div class="detail-grid">
+                <div>
+                  <small>Launch window</small>
+                  <strong id="mission-launch">2026</strong>
+                </div>
+                <div>
+                  <small>Location</small>
+                  <strong id="mission-location">Deep space</strong>
+                </div>
+                <div>
+                  <small>Focus</small>
+                  <strong id="mission-focus">Human exploration</strong>
+                </div>
+                <div>
+                  <small>Fact</small>
+                  <strong id="mission-fact">Up to 4 crew members</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="cosmo-ai section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">AI ASSISTANT</span>
+            <h3>🤖 COSMO AI</h3>
+          </div>
+
+          <div class="chat-shell">
+            <div class="chat-header">
+              <div>
+                <strong>COSMO AI</strong>
+                <small>Ask anything about space.</small>
+              </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+              <div class="message ai-message">
+                Hi! I can explain space in simple ways. Ask me about solar flares, planets, or missions.
+              </div>
+            </div>
+
+            <div class="quick-actions">
+              <button class="chip" data-question="What is a solar flare?">Explain simply</button>
+              <button class="chip" data-question="Give me a visual explanation of a solar flare.">Give me a visual explanation</button>
+              <button class="chip" data-question="Give me 3 facts about Mars.">Give me 3 facts</button>
+              <button class="chip" data-question="What is the James Webb telescope?">Ask another question</button>
+            </div>
+
+            <div class="chat-input-wrap">
+              <input id="chat-input" type="text" placeholder="Ask about space..." />
+              <button id="send-chat" class="primary-btn small">Ask</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="feed section reveal">
+          <div class="section-heading left space-between">
+            <div>
+              <span class="section-kicker">DISCOVERIES</span>
+              <h3>LATEST DISCOVERIES</h3>
+            </div>
+            <div class="feed-filters">
+              <button class="filter-btn active" data-filter="all">ALL</button>
+              <button class="filter-btn" data-filter="planets">PLANETS</button>
+              <button class="filter-btn" data-filter="stars">STARS</button>
+              <button class="filter-btn" data-filter="galaxies">GALAXIES</button>
+              <button class="filter-btn" data-filter="earth">EARTH</button>
+              <button class="filter-btn" data-filter="space missions">SPACE MISSIONS</button>
+            </div>
+          </div>
+
+          <div class="discovery-grid" id="discovery-grid"></div>
+        </section>
+
+        <section id="quiz" class="quiz section reveal">
+          <div class="section-heading left">
+            <span class="section-kicker">SPACE KNOWLEDGE</span>
+            <h3>🧠 TEST YOUR SPACE KNOWLEDGE</h3>
+          </div>
+
+          <div class="quiz-shell">
+            <div class="quiz-panel">
+              <p class="quiz-question" id="quiz-question">Which telescope observes the universe primarily in infrared?</p>
+              <div class="quiz-options" id="quiz-options"></div>
+              <div class="quiz-feedback hidden" id="quiz-feedback"></div>
+            </div>
+
+            <div class="leaderboard">
+              <div class="leader-header">
+                <span>Mission Score</span>
+                <strong id="score-value">0</strong>
+              </div>
+              <div class="progress-wrap">
+                <div class="progress-bar" id="progress-bar"></div>
+              </div>
+              <div class="fun-fact">
+                <small>Fun space fact</small>
+                <p id="fun-fact">A single teaspoon of neutron star material would weigh billions of tons on Earth.</p>
+              </div>
+              <ul class="leader-list">
+                <li><span>Commander Nova</span><strong>92%</strong></li>
+                <li><span>Orbit Scholar</span><strong>88%</strong></li>
+                <li><span>You</span><strong id="you-score">0%</strong></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="final-cta section reveal">
+          <div class="cta-panel">
+            <p>THE UNIVERSE IS WAITING.</p>
+            <h3>Explore it. Understand it. Build for it.</h3>
+            <div class="cta-actions">
+              <button class="primary-btn">🚀 EXPLORE SPACE</button>
+              <button class="secondary-btn">🧠 TEST YOUR KNOWLEDGE</button>
+              <button class="secondary-btn">🌎 EXPLORE EARTH</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <p>NASA MISSION PULSE</p>
+        <span>Explore Space. Understand Earth. Discover Tomorrow.</span>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
   </body>
 </html>
